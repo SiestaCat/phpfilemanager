@@ -1,0 +1,17 @@
+{
+    "name": "siestacat/phpfilemanager",
+    "type": "library",
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "Siestacat\\Phpfilemanager\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "SiestaCat"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
