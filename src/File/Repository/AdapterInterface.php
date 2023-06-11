@@ -10,5 +10,7 @@ interface AdapterInterface
 
     public function add(string $hash, string $local_path):File;
 
+    public function exists(string $hash):bool;
+
     public function del(string $hash):bool;
 }
