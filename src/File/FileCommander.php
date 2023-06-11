@@ -51,6 +51,11 @@ class FileCommander
 
         $hash = $hash === null ? $this->hash_file($local_path) : $hash;
 
+        if($this->exists($hash))
+        {
+            return $this->get($hash);
+        }
+
         return $this->adapter->add($hash, $local_path);
     }
 
