@@ -8,6 +8,10 @@ use Siestacat\Phpfilemanager\Exception\LocalFileNotExistsException;
 use Siestacat\Phpfilemanager\Exception\LocalFileNotReadableException;
 use Siestacat\Phpfilemanager\File\Repository\AdapterInterface;
 
+/**
+ * Class to call any file adapter and do things
+ * @package Siestacat\Phpfilemanager\File
+ */
 class FileCommander
 {
 
@@ -16,6 +20,12 @@ class FileCommander
     public function __construct(private AdapterInterface $adapter, private string $hash_algo = self::DEFAULT_HASH_ALGO)
     {}
 
+    /**
+     * Get file object by hash
+     * @param string $hash 
+     * @return File 
+     * @throws FileNotExistsException 
+     */
     public function get(string $hash):File
     {
         if(!$this->exists($hash)) throw new FileNotExistsException($hash);
@@ -23,6 +33,15 @@ class FileCommander
         return $this->adapter->get($hash);
     }
 
+    /**
+     * Add file
+     * @param string $local_path 
+     * @param null|string $hash 
+     * @return File 
+     * @throws LocalFileNotExistsException 
+     * @throws LocalFileNotReadableException 
+     * @throws HashFileException 
+     */
     public function add(string $local_path, ?string $hash = null):File
     {
 
@@ -35,11 +54,22 @@ class FileCommander
         return $this->adapter->add($hash, $local_path);
     }
 
+    /**
+     * Check file exists
+     * @param string $hash 
+     * @return bool 
+     */
     public function exists(string $hash):bool
     {
         return $this->adapter->exists($hash);
     }
 
+    /**
+     * Delete file
+     * @param string $hash 
+     * @return bool 
+     * @throws FileNotExistsException 
+     */
     public function del(string $hash):bool
     {
         if(!$this->exists($hash)) throw new FileNotExistsException($hash);
@@ -47,6 +77,13 @@ class FileCommander
         return $this->adapter->del($hash);
     }
 
+    /**
+     * Hash local file
+     * @param string $local_path 
+     * @param null|string $hash_algo 
+     * @return string 
+     * @throws HashFileException 
+     */
     public function hash_file(string $local_path, ?string $hash_algo = null):string
     {
         $hash = hash_file
