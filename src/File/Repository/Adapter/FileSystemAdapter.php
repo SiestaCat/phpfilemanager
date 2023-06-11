@@ -3,6 +3,7 @@
 namespace Siestacat\Phpfilemanager\File\Repository\Adapter;
 
 use Siestacat\Phpfilemanager\File\File;
+use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemException\MakeDirException;
 use Siestacat\Phpfilemanager\File\Repository\AdapterInterface;
 
 final class FileSystemAdapter implements AdapterInterface
@@ -11,16 +12,16 @@ final class FileSystemAdapter implements AdapterInterface
     const HASH_DIR_DEEP = 2;
     const HASH_DIR_LENGTH = 2;
 
-    private string $abs_path;
-
-    public function __construct(string $abs_path)
+    public function __construct(private string $data_dir)
     {
-        if(!in_array(substr($abs_path, -1), ['/', '\\']))
+        if(!in_array(substr($this->data_dir, -1), ['/', '\\']))
         {
-            $abs_path .= DIRECTORY_SEPARATOR;
+            $this->data_dir .= DIRECTORY_SEPARATOR;
         }
 
-        $this->abs_path = $abs_path;
+        if(!is_dir($this->data_dir) && !mkdir($this->data_dir, 0777, true)) throw new MakeDirException($this->data_dir);
+
+        $this->data_dir = realpath($this->data_dir);
     }
 
     public function get(string $hash):File
@@ -36,16 +37,16 @@ final class FileSystemAdapter implements AdapterInterface
 
         $dir = dirname($path);
 
-        if(!is_dir($dir)) mkdir($dir, 0777, true);
+        if(!is_dir($dir) && !mkdir($dir, 0777, true)) throw new MakeDirException($dir);
 
         copy($local_path, $path);
 
         return new File($hash, $path);
     }
 
-    public function exists(string $hash):bool
+    public function exists(string $hash, ?string $path = null):bool
     {
-        $path = $this->getPath($hash);
+        $path = $path === null ? $this->getPath($hash) : $path;
 
         return is_file($path);
     }
@@ -54,12 +55,16 @@ final class FileSystemAdapter implements AdapterInterface
     {
         $path = $this->getPath($hash);
 
-        $unlink = unlink($path);
+        $unlink = true;
+
+        if($this->exists($hash, $path)) $unlink = unlink($path);
 
         $dir = dirname($path);
 
         for($a=1;$a<=self::HASH_DIR_DEEP;$a++)
         {
+
+            if(!file_exists($dir) || (file_exists($dir) && !is_dir($dir))) break;
 
             $this->checkEmptyDir($dir);
 
@@ -71,12 +76,11 @@ final class FileSystemAdapter implements AdapterInterface
 
     public function getPath(string $hash):string
     {
-        return $this->abs_path . $this->hashToRelPath($hash);
+        return $this->data_dir . $this->hashToRelPath($hash);
     }
 
     private function checkEmptyDir(string $dir):void
     {
-
         $files = scandir($dir);
 
         if(!is_array($files)) return;

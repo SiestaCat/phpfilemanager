@@ -2,6 +2,10 @@
 
 namespace Siestacat\Phpfilemanager\Tests\File;
 use PHPUnit\Framework\TestCase;
+use Siestacat\Phpfilemanager\Exception\FileNotExistsException;
+use Siestacat\Phpfilemanager\Exception\HashFileException;
+use Siestacat\Phpfilemanager\Exception\LocalFileNotExistsException;
+use Siestacat\Phpfilemanager\Exception\LocalFileNotReadableException;
 use Siestacat\Phpfilemanager\File\File;
 use Siestacat\Phpfilemanager\File\FileCommander;
 use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemAdapter;
@@ -31,6 +35,37 @@ class FileCommanderTest extends TestCase
         $commander->add($local_path);
 
         $this->assertTrue($commander->exists($commander->hash_file($local_path)));
+    }
+
+    public function testAddFileNotExists():void
+    {
+        $this->expectException(LocalFileNotExistsException::class);
+
+        $this->getCommander()->add(self::genRandomHash() . '.zip');
+    }
+
+    public function testAddFileNotReadable():void
+    {
+        $unreadable_file = __DIR__ . '/../unreadable_file.txt';
+
+        $fileperms = fileperms($unreadable_file);
+
+        chmod($unreadable_file, 0000);
+
+        try
+        {
+            $this->getCommander()->add($unreadable_file);
+        }
+        catch(LocalFileNotReadableException $e)
+        {
+            chmod($unreadable_file, $fileperms);
+            $this->assertTrue(true);
+            return;
+        }
+
+        $this->assertTrue(false);
+
+        
     }
 
     public function testGet():void
@@ -66,7 +101,9 @@ class FileCommanderTest extends TestCase
 
     public function testDelNonExistent():void
     {
-        $this->assertFalse($this->getCommander()->del(self::genRandomHash()));
+        $this->expectException(FileNotExistsException::class);
+
+        $this->getCommander()->del(self::genRandomHash());
     }
 
     public function testDel():void
@@ -81,5 +118,14 @@ class FileCommanderTest extends TestCase
         $file = $commander->get($hash);
 
         $this->assertTrue($this->getCommander()->del($file->getHash()));
+    }
+
+    public function testHashFileException():void
+    {
+        $this->expectException(\ValueError::class);
+
+        $this->expectExceptionMessage('hash_file');
+
+        $this->getCommander()->hash_file(__FILE__, 'hash_algo_not_exists');
     }
 }
