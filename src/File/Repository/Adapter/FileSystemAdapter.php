@@ -14,14 +14,9 @@ final class FileSystemAdapter implements AdapterInterface
 
     public function __construct(private string $data_dir)
     {
-        if(!in_array(substr($this->data_dir, -1), ['/', '\\']))
-        {
-            $this->data_dir .= DIRECTORY_SEPARATOR;
-        }
-
         if(!is_dir($this->data_dir) && !mkdir($this->data_dir, 0777, true)) throw new MakeDirException($this->data_dir);
 
-        $this->data_dir = realpath($this->data_dir);
+        $this->data_dir = realpath($this->data_dir) . DIRECTORY_SEPARATOR;
     }
 
     public function get(string $hash):File
