@@ -24,6 +24,11 @@ class FileCommander
         return $this->adapter->add($hash, $local_path);
     }
 
+    public function exists(string $hash):bool
+    {
+        return $this->adapter->exists($hash);
+    }
+
     public function del(string $hash):bool
     {
         return $this->adapter->del($hash);
