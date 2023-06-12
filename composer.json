@@ -1,5 +1,6 @@
 {
     "name": "siestacat/phpfilemanager",
+    "description" : "File manager library. Manage files by hash",
     "type": "library",
     "license": "Apache-2.0",
     "autoload": {
