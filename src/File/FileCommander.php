@@ -6,6 +6,7 @@ use Siestacat\Phpfilemanager\Exception\FileNotExistsException;
 use Siestacat\Phpfilemanager\Exception\HashFileException;
 use Siestacat\Phpfilemanager\Exception\LocalFileNotExistsException;
 use Siestacat\Phpfilemanager\Exception\LocalFileNotReadableException;
+use Siestacat\Phpfilemanager\Exception\LocalPathNullException;
 use Siestacat\Phpfilemanager\File\Repository\AdapterInterface;
 
 /**
@@ -42,19 +43,21 @@ class FileCommander
      * @throws LocalFileNotReadableException 
      * @throws HashFileException 
      */
-    public function add(string $local_path, ?string $hash = null):File
+    public function add(?string $local_path, ?string $hash = null):File
     {
+
+        if($hash !== null && $this->exists($hash))
+        {
+            return $this->get($hash);
+        }
+
+        if($local_path === null) throw new LocalPathNullException;
 
         if(!is_file($local_path)) throw new LocalFileNotExistsException($local_path);
 
         if(!is_readable($local_path)) throw new LocalFileNotReadableException($local_path);
 
         $hash = $hash === null ? $this->hash_file($local_path) : $hash;
-
-        if($this->exists($hash))
-        {
-            return $this->get($hash);
-        }
 
         return $this->adapter->add($hash, $local_path);
     }

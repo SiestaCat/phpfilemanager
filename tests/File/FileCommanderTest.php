@@ -6,6 +6,7 @@ use Siestacat\Phpfilemanager\Exception\FileNotExistsException;
 use Siestacat\Phpfilemanager\Exception\HashFileException;
 use Siestacat\Phpfilemanager\Exception\LocalFileNotExistsException;
 use Siestacat\Phpfilemanager\Exception\LocalFileNotReadableException;
+use Siestacat\Phpfilemanager\Exception\LocalPathNullException;
 use Siestacat\Phpfilemanager\File\File;
 use Siestacat\Phpfilemanager\File\FileCommander;
 use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemAdapter;
@@ -127,5 +128,27 @@ class FileCommanderTest extends TestCase
         $this->expectExceptionMessage('hash_file');
 
         $this->getCommander()->hash_file(__FILE__, 'hash_algo_not_exists');
+    }
+
+    public function testAddHashExists():void
+    {
+        $local_path = __FILE__;
+
+        $commander = $this->getCommander();
+
+        $hash = $commander->hash_file($local_path);
+
+        $commander->add($local_path);
+
+        $file = $commander->add(null, $hash);
+
+        $this->assertEquals($file->getHash(), $hash);
+    }
+
+    public function testAddHashNotExists():void
+    {
+        $this->expectException(LocalPathNullException::class);
+
+        $this->getCommander()->add(null, self::genRandomHash());
     }
 }
