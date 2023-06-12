@@ -96,7 +96,7 @@ final class FileSystemAdapter implements AdapterInterface
                     2
                 ),
                 [
-                    substr($hash, 4)
+                    $hash
                 ]
             )
         );
