@@ -3,6 +3,7 @@
 namespace Siestacat\Phpfilemanager\File\Repository\Adapter;
 
 use Siestacat\Phpfilemanager\File\File;
+use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemException\HashLengthException;
 use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemException\MakeDirException;
 use Siestacat\Phpfilemanager\File\Repository\AdapterInterface;
 
@@ -11,6 +12,7 @@ final class FileSystemAdapter implements AdapterInterface
 
     const HASH_DIR_DEEP = 2;
     const HASH_DIR_LENGTH = 2;
+    const MIN_HASH_LENGTH = 8;
 
     public function __construct(private string $data_dir)
     {
@@ -41,6 +43,9 @@ final class FileSystemAdapter implements AdapterInterface
 
     public function exists(string $hash, ?string $path = null):bool
     {
+
+        if(!self::checkHashLength($hash)) return false;
+
         $path = $path === null ? $this->getPath($hash) : $path;
 
         return is_file($path);
@@ -71,6 +76,9 @@ final class FileSystemAdapter implements AdapterInterface
 
     public function getPath(string $hash):string
     {
+
+        self::checkHashLength($hash, true);
+
         return $this->data_dir . $this->hashToRelPath($hash);
     }
 
@@ -100,5 +108,14 @@ final class FileSystemAdapter implements AdapterInterface
                 ]
             )
         );
+    }
+
+    public static function checkHashLength(string $hash, bool $throw = false):bool
+    {
+        $status = strlen($hash) >= self::MIN_HASH_LENGTH;
+
+        if(!$status && $throw) throw new HashLengthException;
+
+        return $status;
     }
 }
