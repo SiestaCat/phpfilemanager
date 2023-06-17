@@ -6,6 +6,7 @@ use Siestacat\Phpfilemanager\File\File;
 use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemException\HashLengthException;
 use Siestacat\Phpfilemanager\File\Repository\Adapter\FileSystemException\MakeDirException;
 use Siestacat\Phpfilemanager\File\Repository\AdapterInterface;
+use Siestacat\PhpScandir\PhpScandir;
 
 final class FileSystemAdapter implements AdapterInterface
 {
@@ -26,6 +27,32 @@ final class FileSystemAdapter implements AdapterInterface
         $path = $this->getPath($hash);
 
         return new File($hash, $path);
+    }
+
+    public function list(int $page, int $page_limit = AdapterInterface::DEFAULT_PAGE_LIMIT): array
+    {
+
+        $files = [];
+
+        $files_skip_count = abs(($page - 1) * $page_limit);
+
+        $files_count = 0;
+
+        PhpScandir::scan($this->data_dir, function(string $filepath, string $filename) use ($files_skip_count, &$files_count, &$files, $page_limit) {
+
+            if(!$this->checkHashLength($filename)) return;
+
+            if($files_count >= $files_skip_count)
+            {
+                $files[] = $this->get(basename($filepath));
+            }
+
+            if(count($files) >= $page_limit) return PhpScandir::STOP_SIGNAL;
+
+            $files_count++;
+        });
+
+        return $files;
     }
 
     public function add(string $hash, string $local_path):File

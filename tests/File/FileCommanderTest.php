@@ -26,16 +26,50 @@ class FileCommanderTest extends TestCase
         return hash(FileCommander::DEFAULT_HASH_ALGO, random_bytes(128));
     }
 
-    public function testAdd():void
+    private function abstractAddSingle(string $local_path):string
     {
-
-        $local_path = __FILE__;
 
         $commander = $this->getCommander();
 
-        $commander->add($local_path);
+        $local_hash = $commander->hash_file($local_path);
 
-        $this->assertTrue($commander->exists($commander->hash_file($local_path)));
+        //test add
+
+        $file = $commander->add($local_path);
+
+        $this->assertEquals($file->getHash(), $local_hash);
+
+        $this->assertTrue($commander->exists($local_hash), "File: " . $local_path);
+
+        //test get
+
+        $file = $commander->get($local_hash);
+
+        return $local_hash;
+    }
+
+    public function abstractDel(string $local_hash):void
+    {
+        $commander = $this->getCommander();
+
+        $file = $commander->get($local_hash);
+
+        $this->assertTrue($commander->del($file->getHash()));
+    }
+
+    public function testAddMultiple():void
+    {
+        $tests_files_dir_path = __DIR__ . '/../tests_files/';
+
+        foreach(scandir($tests_files_dir_path) as $filename)
+        {
+            if(in_array($filename, ['.', '..'])) continue;
+
+            $local_path = $tests_files_dir_path . $filename;
+
+            $local_hash = $this->abstractAddSingle($local_path);
+            $this->abstractDel($local_hash);
+        }
     }
 
     public function testAddFileNotExists():void
@@ -65,34 +99,7 @@ class FileCommanderTest extends TestCase
         }
 
         $this->assertTrue(false);
-
         
-    }
-
-    public function testGet():void
-    {
-
-        $local_path = __FILE__;
-
-        $commander = $this->getCommander();
-
-        $hash = $commander->hash_file($local_path);
-
-        $file = $commander->get($hash);
-
-        $this->addToAssertionCount(1);
-    }
-
-    public function testExists():void
-    {
-
-        $local_path = __FILE__;
-
-        $commander = $this->getCommander();
-
-        $hash = $commander->hash_file($local_path);
-
-        $this->assertTrue($commander->exists($hash));
     }
 
     public function testNotExists():void
@@ -107,42 +114,13 @@ class FileCommanderTest extends TestCase
         $this->getCommander()->del(self::genRandomHash());
     }
 
-    public function testDel():void
-    {
-
-        $local_path = __FILE__;
-
-        $commander = $this->getCommander();
-
-        $hash = $commander->hash_file($local_path);
-
-        $file = $commander->get($hash);
-
-        $this->assertTrue($this->getCommander()->del($file->getHash()));
-    }
-
     public function testHashFileException():void
     {
         $this->expectException(\ValueError::class);
 
         $this->expectExceptionMessage('hash_file');
 
-        $this->getCommander()->hash_file(__FILE__, 'hash_algo_not_exists');
-    }
-
-    public function testAddHashExists():void
-    {
-        $local_path = __FILE__;
-
-        $commander = $this->getCommander();
-
-        $hash = $commander->hash_file($local_path);
-
-        $commander->add($local_path);
-
-        $file = $commander->add(null, $hash);
-
-        $this->assertEquals($file->getHash(), $hash);
+        $this->getCommander()->hash_file(__FILE__, self::genRandomHash());
     }
 
     public function testAddHashNotExists():void

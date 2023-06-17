@@ -4,8 +4,51 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5f2f53fc21d88c1d6580b10a89c3bf1",
-    "packages": [],
+    "content-hash": "1b5b3810c685ad975f5569bd08261363",
+    "packages": [
+        {
+            "name": "siestacat/php-scandir",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SiestaCat/php-scandir.git",
+                "reference": "f3ec1d5179f42d0aed2457a23b6dbcb84a3c8972"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SiestaCat/php-scandir/zipball/f3ec1d5179f42d0aed2457a23b6dbcb84a3c8972",
+                "reference": "f3ec1d5179f42d0aed2457a23b6dbcb84a3c8972",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.2.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Siestacat\\PhpScandir\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "SiestaCat"
+                }
+            ],
+            "description": "Recursively scan directories",
+            "support": {
+                "issues": "https://github.com/SiestaCat/php-scandir/issues",
+                "source": "https://github.com/SiestaCat/php-scandir/tree/1.0.1"
+            },
+            "time": "2023-06-17T10:03:25+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "myclabs/deep-copy",

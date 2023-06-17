@@ -34,6 +34,11 @@ class FileCommander
         return $this->adapter->get($hash);
     }
 
+    public function list(int $page = 1, int $page_limit = AdapterInterface::DEFAULT_PAGE_LIMIT):array
+    {
+        return $this->adapter->list($page, $page_limit);
+    }
+
     /**
      * Add file
      * @param string $local_path 
