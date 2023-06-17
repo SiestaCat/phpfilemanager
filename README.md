@@ -33,4 +33,4 @@ git clone https://github.com/SiestaCat/phpfilemanager.git
 cd phpfilemanager
 composer install
 composer run-script test
-```
+```# phpfilemanager-api-client
