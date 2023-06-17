@@ -105,9 +105,14 @@ class FileCommander
      */
     public function hash_file(string $local_path, ?string $hash_algo = null):string
     {
+        return self::_hash_file($local_path, ($hash_algo === null ? $this->hash_algo : $hash_algo));
+    }
+
+    public static function _hash_file(string $local_path, string $hash_algo = self::DEFAULT_HASH_ALGO):string
+    {
         $hash = hash_file
         (
-            $hash_algo === null ? $this->hash_algo : $hash_algo,
+            $hash_algo,
             $local_path
         );
 
